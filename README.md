@@ -39,13 +39,13 @@ juju status
 Expected output:
 ```
 Model       Controller  Cloud/Region  Version  SLA          Timestamp
-liveblocks  my-k8s      my-k8s        3.6.14   unsupported  11:49:08Z
+liveblocks  my-k8s      my-k8s        3.6.14   unsupported  13:09:22Z
 
-App                    Version  Status  Scale  Charm                  Channel  Rev  Address        Exposed  Message
-liveblocks-dev-server           active      1  liveblocks-dev-server             0  10.152.183.22  no
+App                    Version  Status  Scale  Charm                  Channel      Rev  Address         Exposed  Message
+liveblocks-dev-server           active      1  liveblocks-dev-server  latest/edge    1  10.152.183.212  no
 
 Unit                      Workload  Agent  Address     Ports  Message
-liveblocks-dev-server/0*  active    idle   10.1.0.146
+liveblocks-dev-server/0*  active    idle   10.1.0.138
 ```
 
 ### 4. Test the service
