@@ -79,8 +79,8 @@ curl -s "http://${POD_IP}:1153/v2/rooms" \
 ## Prerequisites
 
 - **Juju 3.x** with a Kubernetes cloud configured
-- **Kubernetes cluster** (Canonical K8s, MicroK8s, EKS, GKE, AKS, etc.)
-- **LXD** VM for testing (Ubuntu 24.04 recommended)
+- **Kubernetes cluster** (Canonical K8s or MicroK8s)
+- **LXD** for VM-based testing (Ubuntu 24.04 recommended)
 
 ## Build Instructions
 
