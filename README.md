@@ -4,6 +4,8 @@ A Kubernetes Juju charm that deploys the [Liveblocks](https://liveblocks.io/) de
 
 Liveblocks is a platform for building collaborative applications. This charm deploys the development server which provides a local environment for testing Liveblocks features without connecting to the production Liveblocks service.
 
+A single dev server instance maps to one Liveblocks [room](https://liveblocks.io/docs/concepts)—the space where users collaborate on shared documents, diagrams, or other artifacts.
+
 ## Features
 
 - Automated deployment to Kubernetes via Juju
