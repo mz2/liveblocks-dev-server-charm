@@ -27,8 +27,7 @@ sudo concierge prepare -p k8s
 
 ```bash
 juju add-model liveblocks
-juju deploy ./liveblocks-dev-server_amd64.charm \
-  --resource liveblocks-image=ghcr.io/liveblocks/dev-server:latest
+juju deploy liveblocks-dev-server --channel=edge
 ```
 
 ### 3. Verify deployment
@@ -119,14 +118,6 @@ juju deploy ./liveblocks-dev-server_amd64.charm \
 juju status --watch 2s
 ```
 
-### Deployment with Resource Constraints
-
-```bash
-juju deploy ./liveblocks-dev-server_amd64.charm \
-    --resource liveblocks-image=ghcr.io/liveblocks/dev-server:latest \
-    --constraints "mem=128M cpu-power=100"
-```
-
 ## Configuration
 
 ### Available Options
@@ -134,19 +125,6 @@ juju deploy ./liveblocks-dev-server_amd64.charm \
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `external-hostname` | string | `""` | External hostname for ingress. If empty, uses the application name. |
-
-### View Configuration
-
-```bash
-juju config liveblocks-dev-server
-```
-
-### Change Configuration
-
-```bash
-# Set external hostname for ingress
-juju config liveblocks-dev-server external-hostname=liveblocks.example.com
-```
 
 ## Ingress Setup
 
