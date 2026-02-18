@@ -84,30 +84,17 @@ curl -s "http://${POD_IP}:1153/v2/rooms" \
 
 ## Build Instructions
 
-All charmcraft and juju commands **must** run inside an LXD container (or VM as fallback).
-
-### 1. Create Build Environment
+### 1. Install build tools with Concierge
 
 ```bash
-# Create an Ubuntu container for building
-lxc launch ubuntu:24.04 charm-builder
-lxc exec charm-builder -- bash
+sudo snap install --classic concierge
+sudo concierge prepare -p charmcraft
 ```
 
-### 2. Install Build Dependencies
+### 2. Clone and build
 
 ```bash
-# Inside the Incus container
-sudo snap install charmcraft --classic
-sudo snap install lxd
-sudo lxd init --auto
-```
-
-### 3. Clone and Build
-
-```bash
-# Clone the repository
-git clone <repository-url>
+git clone https://github.com/mz2/liveblocks-dev-server-charm.git
 cd liveblocks-dev-server-charm
 
 # Fetch required charm libraries
