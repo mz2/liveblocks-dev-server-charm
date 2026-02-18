@@ -1,5 +1,7 @@
 # Liveblocks Dev Server Kubernetes Charm
 
+https://github.com/mz2/liveblocks-dev-server-charm
+
 A Kubernetes Juju charm that deploys the [Liveblocks](https://liveblocks.io/) development server.
 
 Liveblocks is a platform for building collaborative applications. This charm deploys the development server which provides a local environment for testing Liveblocks features without connecting to the production Liveblocks service.
