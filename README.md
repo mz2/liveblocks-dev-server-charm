@@ -12,22 +12,70 @@ Liveblocks is a platform for building collaborative applications. This charm dep
 - Support for both HTTP and WebSocket connections on port 1153
 - Configurable external hostname for ingress
 
+## Quick Start (Full VM Deployment)
+
+The included `setup-k8s-in-lxd.sh` script creates an LXD VM with Canonical K8s 1.32 and Juju 3.x ready for charm deployment:
+
+```bash
+# Create VM with K8s and Juju (takes ~5 minutes)
+./setup-k8s-in-lxd.sh liveblocks-demo
+
+# Copy and deploy the charm
+lxc file push liveblocks-dev-server_amd64.charm liveblocks-demo/root/
+lxc exec liveblocks-demo -- juju deploy ./liveblocks-dev-server_amd64.charm \
+  --resource liveblocks-image=ghcr.io/liveblocks/dev-server:latest
+
+# Wait ~60 seconds for deployment, then verify
+lxc exec liveblocks-demo -- juju status
+```
+
+Expected output:
+```
+Model       Controller  Cloud/Region  Version  SLA          Timestamp
+liveblocks  my-k8s      my-k8s        3.6.14   unsupported  11:49:08Z
+
+App                    Version  Status  Scale  Charm                  Channel  Rev  Address        Exposed  Message
+liveblocks-dev-server           active      1  liveblocks-dev-server             0  10.152.183.22  no
+
+Unit                      Workload  Agent  Address     Ports  Message
+liveblocks-dev-server/0*  active    idle   10.1.0.146
+```
+
+Test the service:
+```bash
+# Get pod IP and curl the dev server
+lxc exec liveblocks-demo -- bash -c \
+  "curl -s http://\$(k8s kubectl get pod -l app.kubernetes.io/name=liveblocks-dev-server \
+    -n liveblocks -o jsonpath='{.items[0].status.podIP}'):1153/ | head -5"
+```
+
+Expected output:
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+```
+
+---
+
 ## Prerequisites
 
 - **Juju 3.x** with a Kubernetes cloud configured
-- **Kubernetes cluster** (MicroK8s, EKS, GKE, AKS, etc.)
-- **Incus** or **LXD** container for building the charm (Ubuntu 22.04 or 24.04)
+- **Kubernetes cluster** (Canonical K8s, MicroK8s, EKS, GKE, AKS, etc.)
+- **LXD** VM for testing (Ubuntu 24.04 recommended)
 
 ## Build Instructions
 
-All charmcraft and juju commands **must** run inside an Incus container (or VM as fallback).
+All charmcraft and juju commands **must** run inside an LXD container (or VM as fallback).
 
 ### 1. Create Build Environment
 
 ```bash
 # Create an Ubuntu container for building
-incus launch ubuntu:24.04 charm-builder
-incus exec charm-builder -- bash
+lxc launch ubuntu:24.04 charm-builder
+lxc exec charm-builder -- bash
 ```
 
 ### 2. Install Build Dependencies
