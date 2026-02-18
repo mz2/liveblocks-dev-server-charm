@@ -1,4 +1,5 @@
 name: liveblocks-dev-server
+version: "1.0.6"
 type: charm
 title: Liveblocks Dev Server
 summary: Development server for Liveblocks collaborative applications
