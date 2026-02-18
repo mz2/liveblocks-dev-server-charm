@@ -36,37 +36,24 @@ class TestCharm(unittest.TestCase):
         plan = self.harness.get_container_pebble_plan("liveblocks")
         self.assertIn("liveblocks", plan.services)
 
-    def test_config_changed_updates_layer(self) -> None:
-        """Test that config-changed event updates the Pebble layer."""
+    def test_config_changed_maintains_active_status(self) -> None:
+        """Test that config-changed event maintains active status."""
         self.harness.begin_with_initial_hooks()
         container = self.harness.model.unit.get_container("liveblocks")
         self.harness.charm.on["liveblocks"].pebble_ready.emit(container)
-        self.harness.update_config({"external-hostname": "test.local"})
+        self.harness.charm.on.config_changed.emit()
         self.assertIsInstance(self.harness.model.unit.status, ops.ActiveStatus)
 
     def test_config_changed_without_pebble_waits(self) -> None:
         """Test that config-changed without Pebble sets waiting status."""
         self.harness.begin()
-        self.harness.update_config({"external-hostname": "test.local"})
+        self.harness.charm.on.config_changed.emit()
         self.assertIsInstance(self.harness.model.unit.status, ops.WaitingStatus)
 
     def test_ingress_relation_initialized(self) -> None:
         """Test that ingress relation is initialized."""
         self.harness.begin()
         self.assertTrue(hasattr(self.harness.charm, "ingress"))
-
-    def test_ingress_uses_external_hostname_config(self) -> None:
-        """Test that ingress uses external-hostname from config."""
-        self.harness.begin_with_initial_hooks()
-        self.harness.update_config({"external-hostname": "custom.example.com"})
-        hostname = self.harness.charm._get_ingress_hostname()
-        self.assertEqual(hostname, "custom.example.com")
-
-    def test_ingress_uses_app_name_when_no_hostname(self) -> None:
-        """Test that ingress uses app name when external-hostname is empty."""
-        self.harness.begin_with_initial_hooks()
-        hostname = self.harness.charm._get_ingress_hostname()
-        self.assertEqual(hostname, self.harness.charm.app.name)
 
     def test_pebble_layer_has_health_checks(self) -> None:
         """Test that Pebble layer includes health checks."""
@@ -84,6 +71,16 @@ class TestCharm(unittest.TestCase):
         self.harness.charm.on.update_status.emit()
         # After update_status with running service, should be active
         self.assertIsInstance(self.harness.model.unit.status, ops.ActiveStatus)
+
+    def test_pebble_layer_service_config(self) -> None:
+        """Test that Pebble layer has correct service configuration."""
+        self.harness.begin_with_initial_hooks()
+        container = self.harness.model.unit.get_container("liveblocks")
+        self.harness.charm.on["liveblocks"].pebble_ready.emit(container)
+        plan = self.harness.get_container_pebble_plan("liveblocks")
+        service = plan.services["liveblocks"]
+        self.assertEqual(service.startup, "enabled")
+        self.assertIn("1153", service.command)
 
 
 if __name__ == "__main__":

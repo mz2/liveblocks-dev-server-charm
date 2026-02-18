@@ -10,9 +10,8 @@ A single dev server instance maps to one Liveblocks [room](https://liveblocks.io
 
 - Automated deployment to Kubernetes via Juju
 - Health monitoring and automatic recovery
-- Ingress integration for external access via nginx-ingress-integrator
+- Ingress integration for external access via traefik-k8s
 - Support for both HTTP and WebSocket connections on port 1153
-- Configurable external hostname for ingress
 
 ## Quick Start
 
@@ -79,7 +78,6 @@ curl -s "http://${POD_IP}:1153/v2/rooms" \
 
 ## Prerequisites
 
-- **LXD** for VM-based testing (Ubuntu 24.04 recommended)
 - **Kubernetes cluster** (Canonical K8s or MicroK8s)
 - **Juju 3.x** with a Kubernetes cloud configured
 
@@ -99,7 +97,7 @@ git clone https://github.com/mz2/liveblocks-dev-server-charm.git
 cd liveblocks-dev-server-charm
 
 # Fetch required charm libraries
-charmcraft fetch-lib charms.nginx_ingress_integrator.v0.ingress
+charmcraft fetch-lib charms.traefik_k8s.v2.ingress
 
 # Build the charm
 charmcraft pack
@@ -120,75 +118,21 @@ juju deploy ./liveblocks-dev-server_amd64.charm \
 juju status --watch 2s
 ```
 
-## Configuration
-
-### Available Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `external-hostname` | string | `""` | External hostname for ingress. If empty, uses the application name. |
-
 ## Ingress Setup
 
-To enable external access to the dev server, integrate with nginx-ingress-integrator:
+To enable external access to the dev server, integrate with traefik-k8s:
 
 ```bash
-# Deploy nginx-ingress-integrator
-juju deploy nginx-ingress-integrator
-juju trust nginx-ingress-integrator --scope cluster
-
-# Set your desired hostname
-juju config liveblocks-dev-server external-hostname=liveblocks.local
+# Deploy traefik-k8s
+juju deploy traefik-k8s --trust
 
 # Create the relation
-juju relate liveblocks-dev-server nginx-ingress-integrator
-
-# Verify ingress is created
-kubectl get ingress -n <model-namespace>
+juju relate liveblocks-dev-server traefik-k8s
 ```
 
-### Testing External Access
-
+Check the ingress URL:
 ```bash
-# Add hostname to /etc/hosts (if using local hostname)
-echo "127.0.0.1 liveblocks.local" | sudo tee -a /etc/hosts
-
-# Test HTTP
-curl http://liveblocks.local/
-
-# Test WebSocket (requires wscat: npm install -g wscat)
-wscat -c ws://liveblocks.local/
-```
-
-## Verification
-
-### Check Charm Status
-
-```bash
-juju status
-```
-
-Expected output when healthy:
-```
-Model    Controller  Cloud/Region        Version  SLA          Timestamp
-mymodel  myctrl      microk8s/localhost  3.x.x    unsupported  12:00:00Z
-
-App                      Version  Status  Scale  Charm                    Channel  Rev  Address
-liveblocks-dev-server             active      1  liveblocks-dev-server             0    10.1.x.x
-
-Unit                        Workload  Agent  Address     Ports  Message
-liveblocks-dev-server/0*    active    idle   10.1.x.x
-```
-
-### Test In-Cluster Connectivity
-
-```bash
-# Get the service IP
-kubectl get svc -n <model-namespace> liveblocks-dev-server
-
-# Test from within the cluster
-kubectl run -it --rm test-pod --image=curlimages/curl -- \
-    curl http://liveblocks-dev-server:1153/
+juju run traefik-k8s/0 show-proxied-endpoints
 ```
 
 ## Troubleshooting

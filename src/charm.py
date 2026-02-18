@@ -11,11 +11,11 @@ LIVEBLOCKS_PORT = 1153
 
 # Import ingress library if available (fetched via charmcraft fetch-lib)
 try:
-    from charms.nginx_ingress_integrator.v0.ingress import IngressRequires
+    from charms.traefik_k8s.v2.ingress import IngressPerAppRequirer
     INGRESS_AVAILABLE = True
 except ImportError:
     INGRESS_AVAILABLE = False
-    IngressRequires = None
+    IngressPerAppRequirer = None
 
 
 class LiveblocksDevServerCharm(ops.CharmBase):
@@ -31,20 +31,9 @@ class LiveblocksDevServerCharm(ops.CharmBase):
 
         # Initialize ingress relation if library is available
         if INGRESS_AVAILABLE:
-            self.ingress = IngressRequires(
-                self,
-                {
-                    "service-hostname": self._get_ingress_hostname(),
-                    "service-name": self.app.name,
-                    "service-port": LIVEBLOCKS_PORT,
-                },
-            )
+            self.ingress = IngressPerAppRequirer(self, port=LIVEBLOCKS_PORT)
         else:
             self.ingress = None
-
-    def _get_ingress_hostname(self) -> str:
-        """Get the hostname for ingress configuration."""
-        return self.config.get("external-hostname") or self.app.name
 
     def _get_pebble_layer(self) -> ops.pebble.Layer:
         """Return the Pebble layer configuration for the workload."""
@@ -112,14 +101,6 @@ class LiveblocksDevServerCharm(ops.CharmBase):
         container.add_layer("liveblocks", self._get_pebble_layer(), combine=True)
         container.replan()
 
-        # Update ingress hostname if relation exists
-        if self.ingress:
-            self.ingress.update_config({
-                "service-hostname": self._get_ingress_hostname(),
-            })
-
-        hostname = self._get_ingress_hostname()
-        logger.info("Configuration updated, external-hostname: %s", hostname)
         self.unit.status = ops.ActiveStatus()
 
     def _on_update_status(self, event: ops.UpdateStatusEvent) -> None:

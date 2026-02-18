@@ -34,16 +34,6 @@ resources:
     description: Liveblocks dev server OCI image
     upstream-source: ghcr.io/liveblocks/dev-server:latest
 
-config:
-  options:
-    external-hostname:
-      default: ""
-      type: string
-      description: |
-        External hostname for ingress configuration.
-        If left empty, the application name will be used as the hostname.
-        Example: "liveblocks.example.com"
-
 requires:
   ingress:
     interface: ingress
