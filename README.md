@@ -203,53 +203,6 @@ juju debug-log --include liveblocks-dev-server
 juju ssh liveblocks-dev-server/0 -- pebble logs liveblocks -f
 ```
 
-### Check Pebble Services
-
-```bash
-juju ssh liveblocks-dev-server/0 -- pebble services
-```
-
-### Check Health Status
-
-```bash
-juju ssh liveblocks-dev-server/0 -- pebble checks
-```
-
-### Common Issues
-
-| Issue | Symptom | Solution |
-|-------|---------|----------|
-| Image pull failure | Status: `waiting` | Verify image name and registry access |
-| Insufficient resources | Pod not scheduling | Reduce constraints or increase cluster capacity |
-| Ingress not working | 404 or connection refused | Check `juju relate` status, verify nginx-ingress-integrator is active |
-| Pebble not ready | Status: `waiting` | Wait for container to start, check pod events with `kubectl describe pod` |
-
-### Debug Commands
-
-```bash
-# Get pod details
-kubectl get pods -n <model-namespace> -l app.kubernetes.io/name=liveblocks-dev-server
-
-# Describe pod for events
-kubectl describe pod -n <model-namespace> <pod-name>
-
-# Check Juju model status
-juju status --relations
-
-# View relation data
-juju show-unit liveblocks-dev-server/0
-```
-
-## Cleanup
-
-```bash
-# Remove the application
-juju remove-application liveblocks-dev-server
-
-# Remove ingress (if deployed)
-juju remove-application nginx-ingress-integrator
-```
-
 ## Development
 
 ### Running Unit Tests
@@ -262,17 +215,6 @@ pip install pytest ops
 python -m pytest tests/unit/ -v
 ```
 
-### Building for Development
-
-```bash
-# Build without LXD (destructive mode)
-charmcraft pack --destructive-mode
-```
-
 ## License
 
 See [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please see the [CONTRIBUTING](CONTRIBUTING.md) guide for details.
