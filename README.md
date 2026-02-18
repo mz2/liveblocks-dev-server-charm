@@ -1,4 +1,4 @@
-# Liveblocks Dev Server Kubernetes Charm
+# K8s charm for Liveblocks dev server
 
 A Kubernetes Juju charm that deploys the [Liveblocks](https://liveblocks.io/) development server.
 
