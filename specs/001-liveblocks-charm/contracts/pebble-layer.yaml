@@ -1,0 +1,41 @@
+# Liveblocks Dev Server Pebble Layer
+# Contract: Service and health check configuration
+
+summary: liveblocks dev server layer
+description: Pebble configuration for the Liveblocks development server
+
+services:
+  liveblocks:
+    override: replace
+    summary: Liveblocks development server
+    # Note: The actual command depends on the container's entrypoint
+    # This is a placeholder - the charm will use the container's default
+    command: /usr/local/bin/liveblocks-dev-server
+    startup: enabled
+    # Restart policies
+    on-success: restart
+    on-failure: restart
+    backoff-delay: 1s
+    backoff-factor: 2.0
+    backoff-limit: 30s
+
+checks:
+  # Readiness check - maps to K8s readiness probe
+  ready:
+    override: replace
+    level: ready
+    period: 10s
+    timeout: 3s
+    threshold: 3
+    tcp:
+      port: 1153
+
+  # Liveness check - maps to K8s liveness probe
+  alive:
+    override: replace
+    level: alive
+    period: 30s
+    timeout: 5s
+    threshold: 3
+    tcp:
+      port: 1153

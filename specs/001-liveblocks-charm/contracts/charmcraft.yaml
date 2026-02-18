@@ -1,0 +1,56 @@
+# Liveblocks Dev Server Kubernetes Charm
+# Contract: charmcraft.yaml specification
+
+name: liveblocks-dev-server
+type: charm
+title: Liveblocks Dev Server
+summary: Development server for Liveblocks collaborative applications
+description: |
+  A Kubernetes charm that deploys the Liveblocks development server.
+
+  Liveblocks is a platform for building collaborative applications.
+  This charm deploys the development server which provides a local
+  environment for testing Liveblocks features without connecting to
+  the production Liveblocks service.
+
+  Features:
+  - Automated deployment to Kubernetes via Juju
+  - Health monitoring and automatic recovery
+  - Ingress integration for external access
+  - Support for both HTTP and WebSocket connections
+
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+
+# Workload container definition
+containers:
+  liveblocks:
+    resource: liveblocks-image
+
+# OCI image resource
+resources:
+  liveblocks-image:
+    type: oci-image
+    description: Liveblocks dev server OCI image
+    upstream-source: ghcr.io/liveblocks/dev-server:latest
+
+# Charm configuration options
+config:
+  options:
+    external-hostname:
+      default: ""
+      type: string
+      description: |
+        External hostname for ingress configuration.
+        If left empty, the application name will be used as the hostname.
+        Example: "liveblocks.example.com"
+
+# Relation interfaces
+requires:
+  ingress:
+    interface: ingress
+    optional: true

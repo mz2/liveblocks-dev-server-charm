@@ -1,0 +1,54 @@
+# Liveblocks Dev Server Ingress Relation
+# Contract: Data provided to nginx-ingress-integrator
+
+# Relation interface specification
+relation:
+  name: ingress
+  interface: ingress
+  direction: requires
+  optional: true
+
+# Data schema provided by this charm
+provided_data:
+  service-hostname:
+    type: string
+    description: |
+      The hostname for the ingress resource.
+      Derived from config['external-hostname'] or app.name if not set.
+    example: "liveblocks.example.com"
+    required: true
+
+  service-name:
+    type: string
+    description: |
+      The name of the Kubernetes service to route traffic to.
+      Always set to the application name.
+    example: "liveblocks-dev-server"
+    required: true
+
+  service-port:
+    type: integer
+    description: |
+      The port on which the service listens.
+      Fixed at 1153 for the Liveblocks dev server.
+    value: 1153
+    required: true
+
+# Expected nginx-ingress-integrator behavior
+expected_behavior:
+  - Creates Kubernetes Ingress resource
+  - Routes HTTP traffic to service-port
+  - Routes WebSocket traffic (Upgrade headers) to service-port
+  - Applies TLS if configured on nginx-ingress-integrator side
+
+# Usage example
+usage: |
+  # Deploy with ingress
+  juju deploy nginx-ingress-integrator
+  juju deploy liveblocks-dev-server --config external-hostname=liveblocks.local
+  juju relate liveblocks-dev-server nginx-ingress-integrator
+
+  # Access via ingress
+  curl http://liveblocks.local/
+  # Or WebSocket
+  wscat -c ws://liveblocks.local/

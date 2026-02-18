@@ -1,0 +1,23 @@
+[project]
+name = "liveblocks-dev-server-charm"
+version = "0.1.0"
+description = "A Kubernetes Juju charm for the Liveblocks development server"
+requires-python = ">=3.10"
+dependencies = [
+    "ops>=2.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-operator>=0.30",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 99
+target-version = "py310"
