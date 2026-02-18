@@ -12,21 +12,29 @@ Liveblocks is a platform for building collaborative applications. This charm dep
 - Support for both HTTP and WebSocket connections on port 1153
 - Configurable external hostname for ingress
 
-## Quick Start (Full VM Deployment)
+## Quick Start
 
-The included `setup-k8s-in-lxd.sh` script creates an LXD VM with Canonical K8s 1.32 and Juju 3.x ready for charm deployment:
+### 1. Set up Juju with Kubernetes using Concierge
+
+[Concierge](https://github.com/canonical/concierge) provisions a complete Juju + Kubernetes environment:
 
 ```bash
-# Create VM with K8s and Juju (takes ~5 minutes)
-./setup-k8s-in-lxd.sh liveblocks-dev-server
+sudo snap install --classic concierge
+sudo concierge prepare -p k8s
+```
 
-# Copy and deploy the charm
-lxc file push liveblocks-dev-server_amd64.charm liveblocks-dev-server/root/
-lxc exec liveblocks-dev-server -- juju deploy ./liveblocks-dev-server_amd64.charm \
+### 2. Deploy the charm
+
+```bash
+juju add-model liveblocks
+juju deploy ./liveblocks-dev-server_amd64.charm \
   --resource liveblocks-image=ghcr.io/liveblocks/dev-server:latest
+```
 
-# Wait ~60 seconds for deployment, then verify
-lxc exec liveblocks-dev-server -- juju status
+### 3. Verify deployment
+
+```bash
+juju status
 ```
 
 Expected output:
@@ -41,17 +49,29 @@ Unit                      Workload  Agent  Address     Ports  Message
 liveblocks-dev-server/0*  active    idle   10.1.0.146
 ```
 
-Test the service:
+### 4. Test the service
+
 ```bash
-# Check health endpoint
-lxc exec liveblocks-dev-server -- bash -c \
-  "curl -s http://\$(k8s kubectl get pod -l app.kubernetes.io/name=liveblocks-dev-server \
-    -n liveblocks -o jsonpath='{.items[0].status.podIP}'):1153/health"
+# Get the pod IP
+POD_IP=$(kubectl get pod -l app.kubernetes.io/name=liveblocks-dev-server \
+  -n liveblocks -o jsonpath='{.items[0].status.podIP}')
+
+# Create a room (use sk_localdev as the secret key for the dev server)
+curl -s -X POST "http://${POD_IP}:1153/v2/rooms" \
+  -H 'Authorization: Bearer sk_localdev' \
+  -H 'Content-Type: application/json' \
+  -d '{"id":"my-room"}'
 ```
 
 Expected output:
 ```json
-{"status":"ok"}
+{"type":"room","id":"my-room","createdAt":"2026-02-18T12:08:11.552Z","metadata":{},"defaultAccesses":["room:write"],"groupsAccesses":{},"usersAccesses":{}}
+```
+
+List rooms:
+```bash
+curl -s "http://${POD_IP}:1153/v2/rooms" \
+  -H 'Authorization: Bearer sk_localdev'
 ```
 
 ---
