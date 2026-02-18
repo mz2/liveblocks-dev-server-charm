@@ -4,7 +4,7 @@
 
 set -e
 
-VM_NAME="${1:-liveblocks-demo}"
+VM_NAME="${1:-liveblocks-dev-server}"
 
 echo "==> Creating LXD VM: $VM_NAME"
 lxc launch ubuntu:24.04 "$VM_NAME" --vm \

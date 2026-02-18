@@ -18,15 +18,15 @@ The included `setup-k8s-in-lxd.sh` script creates an LXD VM with Canonical K8s 1
 
 ```bash
 # Create VM with K8s and Juju (takes ~5 minutes)
-./setup-k8s-in-lxd.sh liveblocks-demo
+./setup-k8s-in-lxd.sh liveblocks-dev-server
 
 # Copy and deploy the charm
-lxc file push liveblocks-dev-server_amd64.charm liveblocks-demo/root/
-lxc exec liveblocks-demo -- juju deploy ./liveblocks-dev-server_amd64.charm \
+lxc file push liveblocks-dev-server_amd64.charm liveblocks-dev-server/root/
+lxc exec liveblocks-dev-server -- juju deploy ./liveblocks-dev-server_amd64.charm \
   --resource liveblocks-image=ghcr.io/liveblocks/dev-server:latest
 
 # Wait ~60 seconds for deployment, then verify
-lxc exec liveblocks-demo -- juju status
+lxc exec liveblocks-dev-server -- juju status
 ```
 
 Expected output:
@@ -43,19 +43,15 @@ liveblocks-dev-server/0*  active    idle   10.1.0.146
 
 Test the service:
 ```bash
-# Get pod IP and curl the dev server
-lxc exec liveblocks-demo -- bash -c \
+# Check health endpoint
+lxc exec liveblocks-dev-server -- bash -c \
   "curl -s http://\$(k8s kubectl get pod -l app.kubernetes.io/name=liveblocks-dev-server \
-    -n liveblocks -o jsonpath='{.items[0].status.podIP}'):1153/ | head -5"
+    -n liveblocks -o jsonpath='{.items[0].status.podIP}'):1153/health"
 ```
 
 Expected output:
-```html
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+```json
+{"status":"ok"}
 ```
 
 ---
